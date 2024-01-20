@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Web Site</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-size: 1rem;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        li {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #ccc;
+            flex-wrap: wrap;
+        }
+        span {
+            font-size: 1rem; /* 修改字体大小，让其随设备屏幕大小而改变 */
+        }
+        .copy-btn {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 1rem; /* 修改字体大小，让其随设备屏幕大小而改变 */
+            margin: 0.5rem;
+            cursor: pointer;
+        }
+        .change-bank {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 1rem; /* 修改字体大小，让其随设备屏幕大小而改变 */
+            margin: 0.5rem;
+            cursor: pointer;
+        }
+        @media screen and (max-width: 767px) {
+            /* 屏幕小于767像素时，调整字体大小 */
+            body {
+                font-size: 0.8rem;
+            }
+            span {
+                font-size: 0.8rem;
+            }
+            .copy-btn {
+                font-size: 0.8rem;
+                padding: 0.5rem;
+                margin: 0.3rem;
+            }
+            .change-bank {
+                font-size: 0.8rem;
+                padding: 0.5rem;
+                margin: 0.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>银行卡号-车架号 生成器</h1>
+    <form method="get" action="">
+        <select name="card_prefix">
+            {% for item in bank_list %}
+            <option value="{{ item.card_prefix }}" {% if item.card_prefix == card_prefix %}selected  =  "selected" {% endif %}>{{ item.card_name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="change-bank">切换银行</button>
+    </form>
+    <ul>
+        {% for item in result %}
+        <li>
+            <span>{{ item.card_num }}</span>
+            <span>-</span>
+            <span>{{ item.vin }}</span>
+            <button class="copy-card-num-btn copy-btn" data-text="{{ item.card_num }}">复制卡号</button>
+            <button class="copy-vin-btn copy-btn" data-text="{{ item.vin }}">复制车架号</button>
+        </li>
+        {% endfor %}
+    </ul>
+    <script>
+        function copyToClipboard(text) {
+            var input = document.createElement("textarea");
+            input.value = text;
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand("Copy");
+            input.remove();
+            alert("已复制到剪贴板！");
+        }
+        document.querySelectorAll('.copy-btn').forEach(function(button) {
+            button.addEventListener('click', function() {
+                copyToClipboard(this.dataset.text);
+            });
+        });
+    </script>
+</body>
+</html>
