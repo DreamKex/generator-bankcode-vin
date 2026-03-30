@@ -9,7 +9,8 @@ BANK_LIST = [
     {"card_prefix": "622188", "card_name": "邮储"},
 ]
 
-CARD_NO_LEN=os.getenv("CARD_NO_LEN",19)
+CARD_NO_LEN = int(os.getenv("CARD_NO_LEN", 19))
+TOAST_DURATION = int(os.getenv("TOAST_DURATION", 3))
 
 
 def my_view(request):
@@ -19,4 +20,9 @@ def my_view(request):
     result = []
     for i in range(0, 10):
         result.append({'card_num': luhn.gen_card_num(card_prefix, CARD_NO_LEN), 'vin': luhn.random_vin()})
-    return render(request, 'show.html', {'result': result, "bank_list": BANK_LIST, "card_prefix": card_prefix})
+    return render(request, 'show.html', {
+        'result': result,
+        "bank_list": BANK_LIST,
+        "card_prefix": card_prefix,
+        "toast_duration": TOAST_DURATION
+    })

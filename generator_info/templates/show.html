@@ -21,7 +21,7 @@
             flex-wrap: wrap;
         }
         span {
-            font-size: 1rem; /* 修改字体大小，让其随设备屏幕大小而改变 */
+            font-size: 1rem;
         }
         .copy-btn {
             background-color: #4CAF50;
@@ -31,24 +31,11 @@
             text-align: center;
             text-decoration: none;
             display: inline-block;
-            font-size: 1rem; /* 修改字体大小，让其随设备屏幕大小而改变 */
-            margin: 0.5rem;
-            cursor: pointer;
-        }
-        .change-bank {
-            background-color: #4CAF50;
-            border: none;
-            color: white;
-            padding: 1rem;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 1rem; /* 修改字体大小，让其随设备屏幕大小而改变 */
+            font-size: 1rem;
             margin: 0.5rem;
             cursor: pointer;
         }
         @media screen and (max-width: 767px) {
-            /* 屏幕小于767像素时，调整字体大小 */
             body {
                 font-size: 0.8rem;
             }
@@ -60,24 +47,46 @@
                 padding: 0.5rem;
                 margin: 0.3rem;
             }
-            .change-bank {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-                margin: 0.3rem;
-            }
+        }
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            top: 30px;
+            transform: translateX(-50%);
+            font-size: 17px;
+            opacity: 1;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+        #toast.show {
+            visibility: visible;
+            opacity: 1;
+        }
+        #toast.success {
+            background-color: #4CAF50;
+        }
+        #toast.error {
+            background-color: #f44336;
         }
     </style>
 </head>
 <body>
     <h1>银行卡号-车架号 生成器</h1>
-    <form method="get" action="">
-        <select name="card_prefix">
+    <form method="get" action="" id="bankForm">
+        <select name="card_prefix" id="bankSelect" data-toast-duration="{{ toast_duration }}">
             {% for item in bank_list %}
-            <option value="{{ item.card_prefix }}" {% if item.card_prefix == card_prefix %}selected  =  "selected" {% endif %}>{{ item.card_name }}</option>
+            <option value="{{ item.card_prefix }}" {% if item.card_prefix == card_prefix %}selected="selected" {% endif %}>{{ item.card_name }}</option>
             {% endfor %}
         </select>
-        <button type="submit" class="change-bank">切换银行</button>
     </form>
+    <div id="toast"></div>
     <ul>
         {% for item in result %}
         <li>
@@ -90,15 +99,44 @@
         {% endfor %}
     </ul>
     <script>
-        function copyToClipboard(text) {
-            var input = document.createElement("textarea");
-            input.value = text;
-            document.body.appendChild(input);
-            input.select();
-            document.execCommand("Copy");
-            input.remove();
-            alert("已复制到剪贴板！");
+        document.getElementById('bankSelect').addEventListener('change', function() {
+            document.getElementById('bankForm').submit();
+        });
+
+        var toast = document.getElementById("toast");
+        var toastTimeout;
+
+        function showToast(message, isSuccess) {
+            if (toastTimeout) {
+                clearTimeout(toastTimeout);
+            }
+            toast.textContent = message;
+            toast.className = isSuccess ? "show success" : "show error";
+            var duration = parseInt(document.getElementById('bankSelect').dataset.toastDuration) * 1000;
+            toastTimeout = setTimeout(function() {
+                toast.className = toast.className.replace("show", "").trim();
+            }, duration);
         }
+
+        async function copyToClipboard(text) {
+            try {
+                await navigator.clipboard.writeText(text);
+                showToast("已复制到剪贴板！", true);
+            } catch (err) {
+                var input = document.createElement("textarea");
+                input.value = text;
+                document.body.appendChild(input);
+                input.select();
+                try {
+                    document.execCommand("Copy");
+                    showToast("已复制到剪贴板！", true);
+                } catch(e) {
+                    showToast("复制失败！", false);
+                }
+                input.remove();
+            }
+        }
+
         document.querySelectorAll('.copy-btn').forEach(function(button) {
             button.addEventListener('click', function() {
                 copyToClipboard(this.dataset.text);
